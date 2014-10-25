@@ -2,7 +2,7 @@ from distutils.core import setup
 
 setup(
   name = 'wsgi-profiler',
-  packages = ['wsgi-profiler'],
+  packages = ['wsgi_profiler'],
   version = '0.1',
   description = 'WSGI Profiling Middleware - capture cProfiles with request data.',
   author = 'Grayson Koonce',
