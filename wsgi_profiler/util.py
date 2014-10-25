@@ -1,3 +1,5 @@
+# -*- coding: utf-8 -*-
+
 
 class MergeStream(object):
     """An object that redirects `write` calls to multiple streams.
