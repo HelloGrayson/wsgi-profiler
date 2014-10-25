@@ -1,4 +1,4 @@
-wpm
-===
+wsgi-profiler
+=============
 
-WSGI Profiling Middleware
+WSGI Profiling Middleware - capture cProfiles with request data.
