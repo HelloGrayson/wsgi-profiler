@@ -12,6 +12,8 @@ try:
 except ImportError:
     available = False
 
+from wsgi_profiler.envelope import Envelope
+
 
 class ProfilingMiddleware(object):
 
@@ -25,6 +27,18 @@ class ProfilingMiddleware(object):
         self.triggers = triggers
         self.reporters = reporters
 
+    def __call__(self, environ, start_response):
+
+        if not self.is_triggered(environ):
+            return self.app(environ, start_response)
+
+        envelope, body = self.capture(environ, start_response)
+
+        for reporter in self.reporters:
+            reporter.report(envelope)
+
+        return [body]
+
     def is_triggered(self, environ):
 
         for trigger in self.triggers:
@@ -33,10 +47,7 @@ class ProfilingMiddleware(object):
 
         return False
 
-    def __call__(self, environ, start_response):
-
-        if not self.is_triggered(environ):
-            return self.app(environ, start_response)
+    def capture(self, environ, start_response):
 
         response_body = []
 
@@ -56,12 +67,11 @@ class ProfilingMiddleware(object):
         body = b''.join(response_body)
         elapsed = time.time() - start
 
-        for reporter in self.reporters:
-            reporter.report(
-                profile=profile,
-                elapsed=elapsed,
-                request_method=environ['REQUEST_METHOD'],
-                path_info=environ['PATH_INFO']
-            )
+        envelope = Envelope(
+            profile=profile,
+            elapsed=elapsed,
+            request_path=environ['PATH_INFO'],
+            request_method=environ['REQUEST_METHOD']
+        )
 
-        return [body]
+        return (envelope, body)

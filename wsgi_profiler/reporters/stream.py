@@ -13,13 +13,13 @@ class StreamReporter(object):
         self.sort_by = sort_by
         self.restrictions = restrictions
 
-    def report(self, profile, elapsed, request_method, path_info):
+    def report(self, envelope):
 
-        stats = Stats(profile, stream=self.stream)
+        stats = Stats(envelope.profile, stream=self.stream)
 
         stats.sort_stats(*self.sort_by)
 
         self.stream.write('-' * 80)
-        self.stream.write('\nPATH: %r\n' % path_info)
+        self.stream.write('\nPATH: %r\n' % envelope.request_path)
         stats.print_stats(*self.restrictions)
         self.stream.write('-' * 80 + '\n\n')
