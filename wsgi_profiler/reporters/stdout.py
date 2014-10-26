@@ -7,6 +7,8 @@ from pstats import Stats
 
 class StdoutReporter(object):
 
+    ASYNC = False
+
     def __init__(self, sort_by=('time', 'calls'), restrictions=()):
         self.sort_by = sort_by
         self.restrictions = restrictions

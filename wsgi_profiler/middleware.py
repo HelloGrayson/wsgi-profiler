@@ -1,7 +1,8 @@
 # -*- coding: utf-8 -*-
 from __future__ import absolute_import
 
-import sys, time, os.path, inspect
+import sys, time, os.path
+from threading import Thread
 try:
     try:
         from cProfile import Profile
@@ -14,13 +15,14 @@ except ImportError:
 
 from wsgi_profiler.envelope import Envelope
 from wsgi_profiler.request import Request
-from wsgi_profiler.triggers import AlwaysTrigger
+from wsgi_profiler.send import report
 from wsgi_profiler.reporters import StdoutReporter
+from wsgi_profiler.triggers import AlwaysTrigger
 
 
 class ProfilerMiddleware(object):
 
-    def __init__(self, app, triggers=()):
+    def __init__(self, app, triggers=(), report_in_background=True):
 
         if not available:
             raise RuntimeError('the profiler is not available because '
@@ -35,23 +37,25 @@ class ProfilerMiddleware(object):
                 AlwaysTrigger(reporters=[StdoutReporter(restrictions=[30])])
             ]
 
+        self.report_in_background = report_in_background
+
     def __call__(self, environ, start_response):
 
         request = Request(environ)
 
         # if a profile is triggered
-        if not self.is_triggered(request):
+        if not self._is_triggered(request):
             return self.app(environ, start_response)
 
         # then capture the profile in an envelope
-        envelope, body = self.capture(environ, start_response)
+        envelope, body = self._capture(environ, start_response)
 
         # and report the envelope
-        self.report(envelope, request)
+        self._report(envelope, request)
 
         return [body]
 
-    def is_triggered(self, request):
+    def _is_triggered(self, request):
 
         for trigger in self.triggers:
             if trigger.is_detected(request):
@@ -59,7 +63,7 @@ class ProfilerMiddleware(object):
 
         return False
 
-    def capture(self, environ, start_response):
+    def _capture(self, environ, start_response):
 
         response_body = []
 
@@ -88,7 +92,7 @@ class ProfilerMiddleware(object):
 
         return (envelope, body)
 
-    def report(self, envelope, request):
+    def _report(self, envelope, request):
 
         for trigger in self.triggers:
 
@@ -97,16 +101,20 @@ class ProfilerMiddleware(object):
 
             for reporter in trigger.reporters:
 
-                # see what additional args are defined outside contract
-                reporter_params = inspect.getargspec(reporter.report)[0]
-                reporter_params.remove('self')
-                reporter_params.remove('envelope')
+                # run reporter syncronously if background reporting
+                # is turned off or reporter doesnt support async
+                if not self.report_in_background or (
+                    hasattr(reporter, "ASYNC") and reporter.ASYNC is False
+                ):
+                    report(reporter, envelope, request)
 
-                # create arg bag for reporter call
-                arg_bag = {'envelope': envelope}
-                for param in reporter_params:
-                    if request.get(param):
-                        arg_bag[param] = request.get(param)
+                # else run the reporter in the background so
+                # that the response can be returned to the user quickly
+                else:
+                    thread = Thread(
+                        target=report,
+                        args=(reporter, envelope, request)
+                    )
+                    thread.start()
 
-                # pass envelope and header params to reporter
-                reporter.report(**arg_bag)
+

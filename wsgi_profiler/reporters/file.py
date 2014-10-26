@@ -6,8 +6,9 @@ import os, time
 
 class FileReporter(object):
 
-    def __init__(self, profile_dir):
+    def __init__(self, profile_dir, notifiers=()):
         self.profile_dir = profile_dir
+        self.notifiers = notifiers
 
     def report(self, envelope):
 
@@ -15,4 +16,6 @@ class FileReporter(object):
         path = os.path.join(self.profile_dir, filename)
 
         envelope.profile.dump_stats(path)
+
+        return path
 
