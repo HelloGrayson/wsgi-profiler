@@ -14,7 +14,5 @@ class ProbabilityTrigger(object):
 
         should_profile = random.random() <= self.probability
 
-        #import ipdb; ipdb.set_trace()
-
         return should_profile
 

@@ -14,6 +14,8 @@ except ImportError:
 
 from wsgi_profiler.envelope import Envelope
 from wsgi_profiler.request import Request
+from wsgi_profiler.triggers import AlwaysTrigger
+from wsgi_profiler.reporters import StdoutReporter
 
 
 class ProfilerMiddleware(object):
@@ -25,7 +27,13 @@ class ProfilerMiddleware(object):
                                'profile or pstat is not installed.')
 
         self.app = app
-        self.triggers = triggers
+
+        if triggers:
+            self.triggers = triggers
+        else:
+            self.triggers = [
+                AlwaysTrigger(reporters=[StdoutReporter(restrictions=[30])])
+            ]
 
     def __call__(self, environ, start_response):
 
