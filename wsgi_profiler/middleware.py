@@ -15,19 +15,28 @@ except ImportError:
 
 class ProfilingMiddleware(object):
 
-    def __init__(self, app, reporters=()):
+    def __init__(self, app, triggers=(), reporters=()):
 
         if not available:
             raise RuntimeError('the profiler is not available because '
                                'profile or pstat is not installed.')
 
-        self._app = app
-        self._reporters = reporters
+        self.app = app
+        self.triggers = triggers
+        self.reporters = reporters
+
+    def is_triggered(self, environ):
+
+        for trigger in self.triggers:
+            if trigger.is_detected(environ):
+                return True
+
+        return False
 
     def __call__(self, environ, start_response):
 
-        if not environ.get('HTTP_X_WSGI_PROFILER'):
-            return self._app(environ, start_response)
+        if not self.is_triggered(environ):
+            return self.app(environ, start_response)
 
         response_body = []
 
@@ -36,7 +45,7 @@ class ProfilingMiddleware(object):
             return response_body.append
 
         def runapp():
-            appiter = self._app(environ, catching_start_response)
+            appiter = self.app(environ, catching_start_response)
             response_body.extend(appiter)
             if hasattr(appiter, 'close'):
                 appiter.close()
@@ -47,7 +56,7 @@ class ProfilingMiddleware(object):
         body = b''.join(response_body)
         elapsed = time.time() - start
 
-        for reporter in self._reporters:
+        for reporter in self.reporters:
             reporter.report(
                 profile=profile,
                 elapsed=elapsed,
@@ -56,4 +65,3 @@ class ProfilingMiddleware(object):
             )
 
         return [body]
-

@@ -3,19 +3,26 @@ from __future__ import absolute_import
 from flask import Flask
 app = Flask(__name__)
 
-from wsgi_profiler import ProfilingMiddleware
 
+
+from wsgi_profiler import ProfilingMiddleware
+from wsgi_profiler.triggers import HeaderSwitchTrigger
 from wsgi_profiler.reporters import FileReporter
 from wsgi_profiler.reporters import StreamReporter
-# from wsgi_profiler.reporters import EmailReporter
-# from wsgi_profiler.reporters import HipchatReporter
+
+app.wsgi_app = ProfilingMiddleware(
+    app=app.wsgi_app,
+    triggers=[
+        HeaderSwitchTrigger()
+    ],
+    reporters=[
+        StreamReporter(restrictions=[30]),
+        FileReporter(profile_dir='profiles'),
+    ]
+)
 
 
 
-app.wsgi_app = ProfilingMiddleware(app.wsgi_app, [
-    StreamReporter(restrictions=[30]),
-    FileReporter(profile_dir='profiles'),
-])
 
 @app.route("/")
 def hello():
