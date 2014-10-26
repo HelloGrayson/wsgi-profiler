@@ -3,11 +3,8 @@ from __future__ import absolute_import
 from flask import Flask
 
 from wsgi_profiler import ProfilerMiddleware
-from wsgi_profiler.triggers import OnDemandTrigger
-from wsgi_profiler.triggers import ProbabilityTrigger
-from wsgi_profiler.reporters import StdoutReporter
-from wsgi_profiler.reporters import FileReporter
-from wsgi_profiler.reporters import EmailReporter
+from wsgi_profiler.triggers import OnDemandTrigger, ProbabilityTrigger
+from wsgi_profiler.reporters import StdoutReporter, FileReporter, EmailReporter
 
 app = Flask(__name__)
 
