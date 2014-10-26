@@ -11,13 +11,8 @@ class FileReporter(object):
 
     def report(self, envelope):
 
-        filename = os.path.join(self.profile_dir,
-                '%s.%s.%06dms.%d.prof' % (
-            envelope.request_method,
-            envelope.request_path.strip('/').replace('/', '.') or 'root',
-            envelope.elapsed * 1000.0,
-            time.time()
-        ))
+        filename = '%s.%d.prof' % (envelope.get_name(), time.time())
+        path = os.path.join(self.profile_dir, filename)
 
-        envelope.profile.dump_stats(filename)
+        envelope.profile.dump_stats(path)
 

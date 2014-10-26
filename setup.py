@@ -11,4 +11,5 @@ setup(
   download_url = 'https://github.com/breerly/wsgi-profiler/tarball/0.1',
   keywords = ['testing', 'profiling', 'wsgi', 'middleware'],
   classifiers = [],
+  install_requires = ['gmail>=0.5']
 )
