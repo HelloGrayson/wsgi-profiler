@@ -4,21 +4,24 @@ from __future__ import absolute_import
 
 class OnDemandTrigger(object):
 
-    def __init__(self, required_header_value=None, reporters=()):
-        self.required_header_value = required_header_value
+    def __init__(self, header_key='Enabled',
+                header_value=None, reporters=()):
+
+        self.header_key = header_key
+        self.header_value = header_value
         self.reporters = reporters
 
     def is_detected(self, request):
 
-        prefix = request.get()
+        header = request.get(self.header_key)
 
-        if prefix is None:
+        if header is None:
             return False
 
-        if not self.required_header_value:
+        if not self.header_value:
             return True
 
-        if prefix != self.required_header_value:
+        if header != self.header_value:
             return False
 
         return True

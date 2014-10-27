@@ -11,11 +11,16 @@ def report(reporter, envelope, request):
     reporter_params.remove('self')
     reporter_params.remove('envelope')
 
+    prefix = reporter.__class__.__name__.replace('Reporter', '-')
+
     # create arg bag for reporter call
     arg_bag = {'envelope': envelope}
     for param in reporter_params:
-        if request.get(param):
-            arg_bag[param] = request.get(param)
+
+        argument = request.get(prefix + param)
+
+        if argument:
+            arg_bag[param] = argument
 
     # pass envelope and header params to reporter
     message = reporter.report(**arg_bag)

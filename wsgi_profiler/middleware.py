@@ -101,7 +101,7 @@ class ProfilerMiddleware(object):
 
             for reporter in trigger.reporters:
 
-                # run reporter syncronously if background reporting
+                # run reporter synchronously if background reporting
                 # is turned off or reporter doesnt support async
                 if not self.report_in_background or (
                     hasattr(reporter, "ASYNC") and reporter.ASYNC is False

@@ -10,14 +10,14 @@ app = Flask(__name__)
 
 app.wsgi_app = ProfilerMiddleware(app.wsgi_app, [
     OnDemandTrigger(reporters=[
-        StdoutReporter(restrictions=[30]),
-        FileReporter(
-            profile_dir='profiles'
-            # notifiers=[
-            #     LogNotifier(),
-            #     HipChatNotifier(default_room='developers')
-            # ]
-        ),
+        # StdoutReporter(restrictions=[30]),
+        # FileReporter(
+        #     profile_dir='profiles'
+        #     # notifiers=[
+        #     #     LogNotifier(),
+        #     #     HipChatNotifier(default_room='developers')
+        #     # ]
+        # ),
         EmailReporter(from_address='grayson.koonce@gmail.com')
     ])
 ], report_in_background=False)
