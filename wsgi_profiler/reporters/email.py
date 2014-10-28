@@ -52,35 +52,6 @@ class EmailReporter(object):
 
 
 
-class SmtpAdapter(object):
-
-    def __init__(server, username=None, password=None):
-
-        self.server = smtplib.SMTP(server)
-        self.username = username
-        self.password password
-
-
-    def send(from_address, to_address, subject, body, attachements=()):
-
-        self.server.starttls()
-
-        if self.username and self.password:
-            self.server.login(self.username, self.password)
-
-
-        message = MIMEMultipart()
-        message['From'] = from_address
-        message['To'] = to_address
-        message['Subject'] = subject
-
-        for attachement in attachements:
-            message.attach(MIMEText(attachement)
-
-        server.sendmail(from_address, to_address, message.as_string())
-
-        self.server.quit()
-
 
 
 
